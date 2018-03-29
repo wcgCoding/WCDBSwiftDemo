@@ -1,5 +1,5 @@
 platform :ios, '8.0'
 use_frameworks!
 target 'WCDBDemoSwift' do
-pod 'WCDB.swift', :git => 'https://github.com/Tencent/wcdb.git', :branch => 'dev'
+pod 'WCDB.swift'
 end

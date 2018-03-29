@@ -148,7 +148,8 @@ class TDWDBManager: NSObject {
     static let `default` = TDWDBManager()
     /// 数据库与表的初始化
     /// 文件创建，默认表数据设置
-    final func initializa() {
+    override init() {
+        super.init()
         do {
             // create if not exit
             try TDWDataBase.main.db.create(table: TDWTableName.user.name, of: User.self)
@@ -159,10 +160,10 @@ class TDWDBManager: NSObject {
                 try TDWDataBase.gesture.db.create(table: TDWTableName.fingerUnlock.name, of: FingerUnlock.self)
             })
 
-//            try TDWDataBase.city.db.run(transaction: {
-//                try TDWDataBase.city.db.create(table: TDWTableName.city.name, of: City.self)
-//                try TDWDataBase.city.db.create(table: TDWTableName.province.name, of: Province.self)
-//            })
+            //            try TDWDataBase.city.db.run(transaction: {
+            //                try TDWDataBase.city.db.create(table: TDWTableName.city.name, of: City.self)
+            //                try TDWDataBase.city.db.create(table: TDWTableName.province.name, of: Province.self)
+            //            })
 
             try TDWDataBase.area.db.run(transaction: {
                 try TDWDataBase.area.db.create(table: TDWTableName.district.name, of: Province.self)

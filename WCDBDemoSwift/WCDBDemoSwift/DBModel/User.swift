@@ -15,7 +15,6 @@ class User: WCDBSwift.TableCodable {
     var name: String? // Optional if it would be nil in some WCDB selection
     var height: Double? // Optional if it would be nil in some WCDB selection
     let birthday: Date? = nil
-
     //It must can be initialized
     required init() {}
 

@@ -91,7 +91,7 @@ class WCDBManager {
         }
     }
 
-    /// 更新或插入
+    /// 更新或插入整体
     func insertOrReplace<Object>(_ dataBase: Database, table: String, objects: [Object], errorClosure: ErrorType? = nil, successClosure: SuccessType? = nil) where Object: TableEncodable {
         do {
             try dataBase.insertOrReplace(objects: objects, intoTable: table)

@@ -13,20 +13,19 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+//        queryAllGes()
 
-        queryAllGes()
+        // 测试查找
+        let ges = TDWDBManager.default.getIsOpenGes("inS+GGPEajIh/r7dYavkHMLm0lLUsS9Q+iVJc2t1RdNgmGUTPNZzMw==") ? "打开" : "关闭"
+        print(ges)
 
-//        // 测试查找
-//        let ges = TDWDBManager.default.getIsOpenGes("inS+GGPEajIh/r7dYavkHMLm0lLUsS9Q+iVJc2t1RdNgmGUTPNZzMw==") ? "打开" : "关闭"
-//        print(ges)
-//
 //        // 测试更新
-        TDWDBManager.default.setGesture(312, userID: "inS+GGPEajIh/r7dYavkHMLm0lLUsS9Q+iVJc2t1RdNgmGUTPNZzQQ==")
+//        TDWDBManager.default.setGesture(312, userID: "inS+GGPEajIh/r7dYavkHMLm0lLUsS9Q+iVJc2t1RdNgmGUTPNZzQQ==")
 
         // 测试删除
 //        TDWDBManager.default.deleteGesture("inS+GGPEajIh/r7dYavkHMLm0lLUsS9Q+iVJc2t1RdNgmGUTPNZzQQ==")
 
-        queryAllGes()
+//        queryAllGes()
     }
 
     override func didReceiveMemoryWarning() {
