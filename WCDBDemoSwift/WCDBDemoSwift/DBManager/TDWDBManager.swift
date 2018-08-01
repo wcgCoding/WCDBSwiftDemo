@@ -9,25 +9,40 @@
 import Foundation
 import WCDBSwift
 
+
+/// 以下扩展给业务层使用
+///
+protocol TableProtocol {
+    var name: String {get} // 表名
+    var select: Select? {get} // 表查找子
+    var dataBase: Database {get} // 表对应的数据库
+}
+
+/// 数据库
+protocol DataBaseProtocol {
+    var path: String {get} // 数据库存放路径
+    var tag: Int {get} // 数据库tag 对应唯一数据库
+    var db: Database {get} // 真实数据库
+}
+
+
 /// 数据库
 enum TDWDataBase: String, DataBaseProtocol {
     /// 沙盒document路径
-    fileprivate static let documentPath = NSSearchPathForDirectoriesInDomains(FileManager.SearchPathDirectory.documentDirectory,
+    static let documentPath = NSSearchPathForDirectoriesInDomains(FileManager.SearchPathDirectory.documentDirectory,
                                                                         FileManager.SearchPathDomainMask.userDomainMask, true).first!
     
     case main = "WCDBDemoDB.db"
     case gesture = "Gesture.db"
     case collection = "TDCollection.db"
-    case invitation = "TDInvitationScore.db"
-    case city = "city.sqlite"
     case area = "area.sqlite"
 
     /// 数据库文件路径
     var path: String {
         switch self {
-        case .main, .gesture, .collection, .invitation:
+        case .main, .gesture, .collection:
             return TDWDataBase.documentPath + "/" + self.rawValue
-        case .city, .area:
+        case .area:
             return Bundle.main.bundlePath + "/" + self.rawValue
         }
     }
@@ -41,12 +56,8 @@ enum TDWDataBase: String, DataBaseProtocol {
             return 2
         case .collection:
             return 3
-        case .invitation:
-            return 4
-        case .city:
-            return 5
         case .area:
-            return 6
+            return 4
         }
     }
 
@@ -59,7 +70,7 @@ enum TDWDataBase: String, DataBaseProtocol {
 }
 
 /// 表
-enum TDWTableName: String, TableNameProtocol {
+enum TDWTable: String, TableProtocol {
 
     // main
     case user = "UserTable"
@@ -74,15 +85,10 @@ enum TDWTableName: String, TableNameProtocol {
     case appPageVisitRecord = "AppPageVisitRecord"
     case appEventRecord = "AppEventRecord"
 
-    // invitation
-    case inviteScoreTable = "TDInvitationScoreTable"
-
-    // city
-    case city = "city"
-    case province = "province"
-
     // area
-    case district = "district"
+    case district = "district" // 区
+    case city = "city" // 市
+    case province = "province" // 省
 
     /// 表对应的数据库
     var dataBase: Database {
@@ -93,11 +99,7 @@ enum TDWTableName: String, TableNameProtocol {
             return TDWDataBase.gesture.db
         case .appStartRecord, .appEventRecord, .appPageVisitRecord:
             return TDWDataBase.collection.db
-        case .inviteScoreTable:
-            return TDWDataBase.invitation.db
-//        case .city, .province:
-//            return TDWDataBase.city.db
-        case .district,.city, .province:
+        case .district, .city, .province:
             return TDWDataBase.area.db
         }
     }
@@ -117,20 +119,16 @@ enum TDWTableName: String, TableNameProtocol {
             select = try? dataBase.prepareSelect(of: FingerUnlock.self, fromTable: name, isDistinct: true)
 
         case .appStartRecord:
-            select = try? dataBase.prepareSelect(of: User.self, fromTable: name, isDistinct: true)
+            select = try? dataBase.prepareSelect(of: AppStartRecord.self, fromTable: name, isDistinct: true)
         case .appEventRecord:
-            select = try? dataBase.prepareSelect(of: User.self, fromTable: name, isDistinct: true)
+            select = try? dataBase.prepareSelect(of: AppEventRecord.self, fromTable: name, isDistinct: true)
         case .appPageVisitRecord:
-            select = try? dataBase.prepareSelect(of: User.self, fromTable: name, isDistinct: true)
-
-        case .inviteScoreTable:
-            select = try? dataBase.prepareSelect(of: User.self, fromTable: name, isDistinct: true)
+            select = try? dataBase.prepareSelect(of: AppPageVisitRecord.self, fromTable: name, isDistinct: true)
 
         case .city:
             select = try? dataBase.prepareSelect(of: City.self, fromTable: name, isDistinct: true)
         case .province:
             select = try? dataBase.prepareSelect(of: Province.self, fromTable: name, isDistinct: true)
-
         case .district:
             select = try? dataBase.prepareSelect(of: District.self, fromTable: name, isDistinct: true)
         }
@@ -139,66 +137,122 @@ enum TDWTableName: String, TableNameProtocol {
 
     /// 具体的表名
     var name: String {
-        return rawValue
+        switch self {
+        // main
+        case .user:
+            return "UserTable"
+
+        // gesture
+        case .gesture:
+            return  "Gesture"
+        case .userAccount:
+            return  "UserAccount"
+        case .fingerUnlock:
+            return "FingerUnlock"
+
+        // collection
+        case .appStartRecord:
+            return "AppStartRecord"
+        case .appPageVisitRecord:
+            return "AppPageVisitRecord"
+        case .appEventRecord:
+            return "AppEventRecord"
+
+        // area
+        case .district:
+            return "district"
+        case .city:
+            return "city"
+        case .province:
+            return "province"
+        }
     }
 }
 
 class TDWDBManager: NSObject {
 
-    static let `default` = TDWDBManager()
     /// 数据库与表的初始化
     /// 文件创建，默认表数据设置
-    override init() {
-        super.init()
+    class func createDB() {
         do {
-            // create if not exit
-            try TDWDataBase.main.db.create(table: TDWTableName.user.name, of: User.self)
-
             try TDWDataBase.gesture.db.run(transaction: {
-                try TDWDataBase.gesture.db.create(table: TDWTableName.gesture.name, of: Gesture.self)
-                try TDWDataBase.gesture.db.create(table: TDWTableName.userAccount.name, of: UserAccount.self)
-                try TDWDataBase.gesture.db.create(table: TDWTableName.fingerUnlock.name, of: FingerUnlock.self)
+                try TDWDataBase.gesture.db.create(table: TDWTable.gesture.name, of: Gesture.self)
+                try TDWDataBase.gesture.db.create(table: TDWTable.userAccount.name, of: UserAccount.self)
+                try TDWDataBase.gesture.db.create(table: TDWTable.fingerUnlock.name, of: FingerUnlock.self)
             })
-
-            //            try TDWDataBase.city.db.run(transaction: {
-            //                try TDWDataBase.city.db.create(table: TDWTableName.city.name, of: City.self)
-            //                try TDWDataBase.city.db.create(table: TDWTableName.province.name, of: Province.self)
-            //            })
 
             try TDWDataBase.area.db.run(transaction: {
-                try TDWDataBase.area.db.create(table: TDWTableName.district.name, of: Province.self)
-                try TDWDataBase.area.db.create(table: TDWTableName.city.name, of: City.self)
-                try TDWDataBase.area.db.create(table: TDWTableName.province.name, of: Province.self)
+                try TDWDataBase.area.db.create(table: TDWTable.district.name, of: Province.self)
+                try TDWDataBase.area.db.create(table: TDWTable.city.name, of: City.self)
+                try TDWDataBase.area.db.create(table: TDWTable.province.name, of: Province.self)
             })
 
+            try TDWDataBase.collection.db.run(transaction: {
+                try TDWDataBase.area.db.create(table: TDWTable.appEventRecord.name, of: AppEventRecord.self)
+                try TDWDataBase.area.db.create(table: TDWTable.appStartRecord.name, of: AppStartRecord.self)
+                try TDWDataBase.area.db.create(table: TDWTable.appPageVisitRecord.name, of: AppPageVisitRecord.self)
+            })
         } catch {
             print("初始化数据库及ORM对应关系建立失败")
         }
     }
 }
 
-extension TDWDBManager: DBManagerProtocol {
+extension TDWDBManager {
 
     typealias ErrorType = (WCDBSwift.Error?)->Void
-    typealias SuccessType = ()->Void
 
-    class func update<Object>(_ table: TableNameProtocol, object: Object, propertys: [PropertyConvertible], conditioin: Condition? = nil , errorClosure: ErrorType? = nil, successClosure: SuccessType? = nil ) where Object: TableEncodable {
-        WCDBManager.default.update(table.dataBase, table: table.name, object: object, propertys: propertys, conditioin: conditioin, errorClosure: errorClosure, successClosure: successClosure)
+    class func insert<Object>(_ table: TableProtocol, objects: [Object]) -> WCDBSwift.Error? where Object: TableEncodable {
+        do {
+            try table.dataBase.insert(objects: objects, intoTable: table.name)
+            return nil
+        } catch {
+            let errorValue = error as? WCDBSwift.Error
+            return errorValue
+        }
     }
 
-    class func insert<Object>(_ table: TableNameProtocol, objects: [Object], errorClosure: ErrorType? = nil, successClosure: SuccessType? = nil) where Object: TableEncodable {
-        WCDBManager.default.insert(table.dataBase, table: table.name, objects: objects, errorClosure: errorClosure, successClosure: successClosure)
+    class func update<Object>(_ table: TableProtocol, object: Object, propertys: [PropertyConvertible], condition: Condition? = nil, orderBy: [OrderBy]? = nil, limit: Limit? = nil, offset: Offset? = nil) -> WCDBSwift.Error? where Object: TableEncodable {
+        do {
+            try table.dataBase.update(table: table.name, on: propertys, with: object, where: condition, orderBy: orderBy, limit: limit, offset: offset)
+            return nil
+        } catch {
+            let errorValue = error as? WCDBSwift.Error
+            return errorValue
+        }
     }
 
-    class func select<Object>(_ table: TableNameProtocol, conditioin: Condition? = nil, errorClosure: ErrorType?) -> [Object]? where Object: TableEncodable {
-        return WCDBManager.default.select(table.select, conditioin: conditioin, errorClosure: errorClosure)
+    class func select<Object>(_ table: TableProtocol, condition: Condition? = nil, errorClosure: ErrorType?) -> [Object]? where Object: TableEncodable {
+        do {
+            if let condition = condition {
+                table.select?.where(condition)
+            }
+            let objects: [Object]? = try table.select?.allObjects() as? [Object]
+            return objects
+        } catch {
+            let errorValue = error as? WCDBSwift.Error
+            errorClosure?(errorValue)
+            return nil
+        }
     }
 
-    class func delete(_ table: TableNameProtocol, conditioin: Condition?, errorClosure: DBManagerProtocol.ErrorType?) {
-        WCDBManager.default.delete(table.dataBase, table: table.name, condition: conditioin, errorClosure: errorClosure)
+    class func delete(_ table: TableProtocol, condition: Condition?, orderBy: [OrderBy]? = nil, limit: Limit? = nil, offset: Offset? = nil) -> WCDBSwift.Error? {
+        do {
+            try table.dataBase.delete(fromTable: table.name, where: condition, orderBy: orderBy, limit: limit, offset: offset)
+            return nil
+        } catch {
+            let errorValue = error as? WCDBSwift.Error
+            return errorValue
+        }
     }
 
-    class func insertOrReplace<Object>(_ table: TableNameProtocol, objects: [Object], errorClosure: DBManagerProtocol.ErrorType?, successClosure: DBManagerProtocol.SuccessType?) where Object : TableEncodable {
-        WCDBManager.default.insertOrReplace(table.dataBase, table: table.name, objects: objects, errorClosure: errorClosure, successClosure: successClosure)
+    class func insertOrReplace<Object>(_ table: TableProtocol, objects: [Object]) -> WCDBSwift.Error? where Object : TableEncodable {
+        do {
+            try table.dataBase.insertOrReplace(objects: objects, intoTable: table.name)
+            return nil
+        } catch {
+            let errorValue = error as? WCDBSwift.Error
+            return errorValue
+        }
     }
 }

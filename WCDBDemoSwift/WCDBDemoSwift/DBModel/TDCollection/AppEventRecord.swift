@@ -1,39 +1,55 @@
 //
-//  District.swift
+//  AppEventRecord.swift
 //  WCDBDemoSwift
 //
-//  Created by John on 2017/12/28.
-//  Copyright © 2017年 吴朝刚. All rights reserved.
+//  Created by John on 2018/8/1.
+//  Copyright © 2018年 吴朝刚. All rights reserved.
 //
 
 import Foundation
 import WCDBSwift
 
-class District: WCDBSwift.TableCodable {
+class AppEventRecord: WCDBSwift.TableCodable {
     //Your own properties
-    var DisName: String?
-    var Id: String? // Optional if it would be nil in some WCDB selection
-    var CityID: String? // Optional if it would be nil in some WCDB selection
-
-    //It must can be initialized
-    required init() {}
+    var ClientSessionId: String? = nil
+    var DeviceId: String? = nil // Optional if it would be nil in some WCDB selection
+    var UserName: String? = nil // Optional if it would be nil in some WCDB selection
+    var EventTime: Date? = nil
+    var EventCatagory: String? = nil
+    var EventLabel: String? = nil
+    var EventValue: String? = nil
+    var Status: Int? = nil
+    var FAILURE_REASON_TYPE: String? = nil
+    var FAILURE_REASON: String? = nil
+    var PageId: String? = nil
+    var SysNo: String? = nil
 
     enum CodingKeys: String, CodingTableKey {
-        typealias Root = District
+        typealias Root = AppEventRecord
 
         //List the properties which should be bound to table
-        case DisName
-        case Id
-        case CityID
+        case ClientSessionId
+        case DeviceId
+        case UserName
+        case EventTime
+        case EventCatagory
+        case EventLabel
+        case EventValue
+        case Status
+        case FAILURE_REASON_TYPE
+        case FAILURE_REASON
+        case PageId
+        case SysNo
 
         static let objectRelationalMapping = TableBinding(CodingKeys.self)
 
         //Column constraints for primary key, unique, not null, default value and so on. It is optional.
-//        static var columnConstraintBindings: [CodingKeys: ColumnConstraintBinding]? {
-//            return [
-//                .ID: ColumnConstraintBinding(isPrimary: true, isAutoIncrement: false),
-//            ]
-//        }
+        //static var columnConstraintBindings: [CodingKeys: ColumnConstraintBinding]? {
+        //    return [
+        //        .variable: ColumnConstraintBinding(isPrimary: true, isAutoIncrement: true),
+        //        .variable2: ColumnConstraintBinding(isUnique: true)
+        //    ]
+        //}
 
         //Index bindings. It is optional.
         //static var indexBindings: [IndexBinding.Subfix: IndexBinding]? {

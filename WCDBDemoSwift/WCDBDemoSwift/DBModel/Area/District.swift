@@ -1,5 +1,5 @@
 //
-//  Province.swift
+//  District.swift
 //  WCDBDemoSwift
 //
 //  Created by John on 2017/12/28.
@@ -9,31 +9,29 @@
 import Foundation
 import WCDBSwift
 
-class Province: WCDBSwift.TableCodable {
+class District: WCDBSwift.TableCodable {
     //Your own properties
-    var ProID: String? = nil // Optional if it would be nil in some WCDB
-    var ProName: String? = nil // Optional if it would be nil in some WCDB selection
-    var ProSort: String? = nil
-    var ProRemark: String? = nil
+    var DisName: String?
+    var Id: Int? // Optional if it would be nil in some WCDB selection
+    var CityID: Int? // Optional if it would be nil in some WCDB selection
 
     //It must can be initialized
     required init() {}
 
     enum CodingKeys: String, CodingTableKey {
-        typealias Root = Province
+        typealias Root = District
 
         //List the properties which should be bound to table
-        case ProID
-        case ProName
-        case ProSort
-        case ProRemark
+        case DisName
+        case Id
+        case CityID
 
         static let objectRelationalMapping = TableBinding(CodingKeys.self)
 
         //Column constraints for primary key, unique, not null, default value and so on. It is optional.
 //        static var columnConstraintBindings: [CodingKeys: ColumnConstraintBinding]? {
 //            return [
-//                .ProID: ColumnConstraintBinding(isPrimary: true),
+//                .ID: ColumnConstraintBinding(isPrimary: true, isAutoIncrement: false),
 //            ]
 //        }
 

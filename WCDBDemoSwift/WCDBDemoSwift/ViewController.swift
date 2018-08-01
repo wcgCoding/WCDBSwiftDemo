@@ -15,9 +15,17 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view, typically from a nib.
 //        queryAllGes()
 
+        print(TDWDataBase.documentPath)
         // 测试查找
-        let ges = TDWDBManager.default.getIsOpenGes("inS+GGPEajIh/r7dYavkHMLm0lLUsS9Q+iVJc2t1RdNgmGUTPNZzMw==") ? "打开" : "关闭"
+        let ges = TDWOperateDB.getIsOpenGes("inS+GGPEajIh/r7dYavkHMLm0lLUsS9Q+iVJc2t1RdNgmGUTPNZzMw==") ? "打开" : "关闭"
         print(ges)
+
+        if let records: [AppEventRecord] = TDWCollectDB.getAllEventCollectRecord() {
+            for record in records {
+                print(record.ClientSessionId ?? "")
+            }
+        }
+
 
 //        // 测试更新
 //        TDWDBManager.default.setGesture(312, userID: "inS+GGPEajIh/r7dYavkHMLm0lLUsS9Q+iVJc2t1RdNgmGUTPNZzQQ==")
@@ -35,7 +43,7 @@ class ViewController: UIViewController {
 
     // 查询测试
     func queryAllGes() {
-        let geses: [Gesture]? = TDWDBManager.select(TDWTableName.gesture) { (error) in
+        let geses: [Gesture]? = TDWDBManager.select(TDWTable.gesture) { (error) in
             if let error = error {
                 print(error.description)
             }
@@ -49,7 +57,7 @@ class ViewController: UIViewController {
     }
 
     func test0() {
-        let gestures: [Gesture]? = TDWDBManager.select(TDWTableName.gesture) { (error) in
+        let gestures: [Gesture]? = TDWDBManager.select(TDWTable.gesture) { (error) in
             if let error = error {
                 print(error.description)
             }
@@ -61,7 +69,7 @@ class ViewController: UIViewController {
         }
     }
     func test1() {
-        let gestures: [UserAccount]? = TDWDBManager.select(TDWTableName.userAccount) { (error) in
+        let gestures: [UserAccount]? = TDWDBManager.select(TDWTable.userAccount) { (error) in
             if let error = error {
                 print(error.description)
             }
@@ -73,7 +81,7 @@ class ViewController: UIViewController {
         }
     }
     func test2() {
-        let gestures: [FingerUnlock]? = TDWDBManager.select(TDWTableName.fingerUnlock) { (error) in
+        let gestures: [FingerUnlock]? = TDWDBManager.select(TDWTable.fingerUnlock) { (error) in
             if let error = error {
                 print(error.description)
             }
@@ -86,38 +94,38 @@ class ViewController: UIViewController {
     }
 
     func test3() {
-        let citys: [City]? = TDWDBManager.select(TDWTableName.city) { (error) in
+        let citys: [City]? = TDWDBManager.select(TDWTable.city) { (error) in
             if let error = error {
                 print(error.description)
             }
         }
         if let cityValues = citys {
             for (index, city) in cityValues.enumerated() {
-                print("City表中数据: 行数:\(index) proID:\(city.ProID ?? "") cityName:\(city.CityName ?? "") cityID:\(city.CityID ?? "")")
+                print("City表中数据: 行数:\(index) proID:\(city.ProID ?? 0) cityName:\(city.CityName ?? "") cityID:\(city.CityID ?? 0)")
             }
         }
     }
     func test4() {
-        let provices: [Province]? = TDWDBManager.select(TDWTableName.province) { (error) in
+        let provices: [Province]? = TDWDBManager.select(TDWTable.province) { (error) in
             if let error = error {
                 print(error.description)
             }
         }
         if let proviceValues = provices {
             for (index, province) in proviceValues.enumerated() {
-                print("Province表中数据: 行数:\(index) proID:\(province.ProID ?? "") cityName:\(province.ProName ?? "") proRemark:\(province.ProRemark ?? "")")
+                print("Province表中数据: 行数:\(index) proID:\(province.ProID ?? 0) cityName:\(province.ProName ?? "") proRemark:\(province.ProRemark ?? "")")
             }
         }
     }
     func test5() {
-        let districts: [District]? = TDWDBManager.select(TDWTableName.district) { (error) in
+        let districts: [District]? = TDWDBManager.select(TDWTable.district) { (error) in
             if let error = error {
                 print(error.description)
             }
         }
         if let districtValues = districts {
             for (index, district) in districtValues.enumerated() {
-                print("District表中数据: 行数:\(index) cityID:\(district.CityID ?? "") disName:\(district.DisName ?? "") id:\(district.Id ?? "")")
+                print("District表中数据: 行数:\(index) cityID:\(district.CityID ?? 0) disName:\(district.DisName ?? "") id:\(district.Id ?? 0)")
             }
         }
     }
@@ -141,18 +149,17 @@ class ViewController: UIViewController {
         // 插入操作
         let user = User()
         user.name = "a12"
-        TDWDBManager.insert(TDWTableName.user, objects: [user], errorClosure: { (error) in
-            if let error = error {
-                print(error.description)
-            }
-        }, successClosure: {
+        let error = TDWDBManager.insert(TDWTable.user, objects: [user])
+        if let error = error {
+            print(error.description)
+        }else {
             print("插入成功")
-        })
+        }
     }
 
     func select() -> [User] {
         // 查找操作
-        let objects: [User]? = TDWDBManager.select(TDWTableName.user, errorClosure: { (error) in
+        let objects: [User]? = TDWDBManager.select(TDWTable.user, errorClosure: { (error) in
             if let error = error {
                 print(error.description)
             }
@@ -163,13 +170,12 @@ class ViewController: UIViewController {
 
     func update(_ user: User) {
         // 更新操作
-        TDWDBManager.update(TDWTableName.user, object: user, propertys: [User.Properties.name], errorClosure: { (error) in
-            if let error = error {
-                print(error.description)
-            }
-        }, successClosure: {
+        let error = TDWDBManager.update(TDWTable.user, object: user, propertys: [User.Properties.name])
+        if let error = error {
+            print(error.description)
+        }else {
             print("更新成功")
-        })
+        }
     }
 }
 
