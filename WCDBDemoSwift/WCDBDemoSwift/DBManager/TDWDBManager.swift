@@ -182,7 +182,7 @@ class TDWDBManager: NSObject {
             })
 
             try TDWDataBase.area.db.run(transaction: {
-                try TDWDataBase.area.db.create(table: TDWTable.district.name, of: Province.self)
+                try TDWDataBase.area.db.create(table: TDWTable.district.name, of: District.self)
                 try TDWDataBase.area.db.create(table: TDWTable.city.name, of: City.self)
                 try TDWDataBase.area.db.create(table: TDWTable.province.name, of: Province.self)
             })
