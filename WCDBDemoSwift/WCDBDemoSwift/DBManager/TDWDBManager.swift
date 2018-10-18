@@ -188,9 +188,9 @@ class TDWDBManager: NSObject {
             })
 
             try TDWDataBase.collection.db.run(transaction: {
-                try TDWDataBase.area.db.create(table: TDWTable.appEventRecord.name, of: AppEventRecord.self)
-                try TDWDataBase.area.db.create(table: TDWTable.appStartRecord.name, of: AppStartRecord.self)
-                try TDWDataBase.area.db.create(table: TDWTable.appPageVisitRecord.name, of: AppPageVisitRecord.self)
+                try TDWDataBase.collection.db.create(table: TDWTable.appEventRecord.name, of: AppEventRecord.self)
+                try TDWDataBase.collection.db.create(table: TDWTable.appStartRecord.name, of: AppStartRecord.self)
+                try TDWDataBase.collection.db.create(table: TDWTable.appPageVisitRecord.name, of: AppPageVisitRecord.self)
             })
         } catch {
             print("初始化数据库及ORM对应关系建立失败")
